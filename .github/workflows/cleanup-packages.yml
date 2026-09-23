@@ -1,0 +1,39 @@
+# Every push to main publishes an image tagged `sha-<short>`, and that tag is
+# never reused — so the package's version list grows by one every commit and
+# nothing ever removes the old entries. This prunes them on a schedule.
+#
+# Only the count matters: the newest versions are kept and everything older is
+# deleted. `latest` and `main` always sit on the newest version, so they can
+# never be caught by this. Nothing else is tag-aware, which is fine while main
+# is the only thing published — but if you ever cut a `v*` release, its image
+# is prunable once KEEP newer builds exist. Raise KEEP or pull the release's
+# digest out by hand before that happens.
+name: cleanup-packages
+
+on:
+  schedule:
+    # Sundays, 04:17 UTC. Off the hour, so it does not pile into the rush of
+    # jobs every scheduler fires at :00.
+    - cron: "17 4 * * 0"
+  # Deleting images is not something to discover by surprise: it can also be
+  # run by hand, which is the way to check it does what you expect.
+  workflow_dispatch:
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    permissions:
+      # The default GITHUB_TOKEN can delete versions of a package that is
+      # linked to this repository — the build pushes an
+      # `org.opencontainers.image.source` label, which is what links it. If
+      # this step ever 403s, the link is missing: give this repo admin on the
+      # package under the organisation's package settings.
+      packages: write
+    steps:
+      - uses: actions/delete-package-versions@v5
+        with:
+          owner: JinZhongNyanne
+          package-name: ts-webui-hub
+          package-type: container
+          # Roughly a month of daily commits.
+          min-versions-to-keep: 30
