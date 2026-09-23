@@ -1,0 +1,190 @@
+/*
+ * NEEDY GIRL OVERDOSE skin: a pastel Windows-9x desktop. Chunky ink outlines,
+ * pink-to-violet title bars, hard pixel shadows and a pixel font.
+ *
+ * Only loaded while the skin is selected, so nothing here needs scoping. The
+ * colours of the panels still come from the theme (--bg-elev and friends), so
+ * the look controls keep working on top of the skin.
+ */
+
+:root {
+  --ngo-ink: #3d2466;
+  --ngo-pink: #ff9ad5;
+  --ngo-violet: #b69cff;
+  --ngo-cyan: #8fd3ff;
+  --ngo-titlebar: linear-gradient(90deg, var(--ngo-pink), var(--ngo-violet) 60%, var(--ngo-cyan));
+  --ngo-shadow: 4px 4px 0 var(--ngo-ink);
+  --text: #4b2a78;
+  --text-dim: #8a68b4;
+  --border: #9b7fd0;
+  --font:
+    "DotGothic16", "Zpix", "Fusion Pixel 12px Proportional zh_hans", "PingFang SC",
+    "Microsoft YaHei", monospace;
+}
+
+/* ------------------------------- the desktop ------------------------------- */
+
+body {
+  background:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><path d='M17 18h3v3h-3zM20 18h3v3h-3zM26 18h3v3h-3zM29 18h3v3h-3zM14 21h3v3h-3zM17 21h3v3h-3zM20 21h3v3h-3zM23 21h3v3h-3zM26 21h3v3h-3zM29 21h3v3h-3zM32 21h3v3h-3zM14 24h3v3h-3zM17 24h3v3h-3zM20 24h3v3h-3zM23 24h3v3h-3zM26 24h3v3h-3zM29 24h3v3h-3zM32 24h3v3h-3zM17 27h3v3h-3zM20 27h3v3h-3zM23 27h3v3h-3zM26 27h3v3h-3zM29 27h3v3h-3zM20 30h3v3h-3zM23 30h3v3h-3zM26 30h3v3h-3zM23 33h3v3h-3z' fill='%23ffffff' fill-opacity='.6'/><path d='M82 74h2v2h-2zM82 76h2v2h-2zM78 78h2v2h-2zM80 78h2v2h-2zM82 78h2v2h-2zM84 78h2v2h-2zM86 78h2v2h-2zM82 80h2v2h-2zM82 82h2v2h-2z' fill='%23ffffff' fill-opacity='.8'/><path d='M86 20h2v2h-2zM88 20h2v2h-2zM92 20h2v2h-2zM94 20h2v2h-2zM84 22h2v2h-2zM86 22h2v2h-2zM88 22h2v2h-2zM90 22h2v2h-2zM92 22h2v2h-2zM94 22h2v2h-2zM96 22h2v2h-2zM84 24h2v2h-2zM86 24h2v2h-2zM88 24h2v2h-2zM90 24h2v2h-2zM92 24h2v2h-2zM94 24h2v2h-2zM96 24h2v2h-2zM86 26h2v2h-2zM88 26h2v2h-2zM90 26h2v2h-2zM92 26h2v2h-2zM94 26h2v2h-2zM88 28h2v2h-2zM90 28h2v2h-2zM92 28h2v2h-2zM90 30h2v2h-2z' fill='%23ff8fcf' fill-opacity='.35'/></svg>")
+      0 0 / 120px 120px,
+    linear-gradient(rgba(255, 255, 255, 0.28) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.28) 1px, transparent 1px) 0 0 / 24px 24px,
+    var(--app-bg);
+  background-attachment: fixed;
+}
+
+::selection {
+  background: var(--ngo-pink);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.5);
+}
+::-webkit-scrollbar-thumb {
+  background: #ffc2e6;
+  border: 2px solid var(--ngo-ink);
+  border-radius: 0;
+}
+
+/* --------------------------------- controls -------------------------------- */
+
+button {
+  border: 2px solid var(--ngo-ink);
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 2px 2px 0 var(--ngo-ink);
+  color: var(--text);
+}
+button:hover {
+  border-color: var(--ngo-ink);
+  background: #ffe6f5;
+}
+button:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+input,
+select,
+textarea {
+  background: #fff;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px #ffd3ec;
+}
+
+/* ---------------------------------- windows -------------------------------- */
+
+.dock.dockview-theme-abyss,
+.dock .dockview-theme-abyss {
+  --dv-tabs-and-actions-container-background-color: transparent;
+  --dv-activegroup-visiblepanel-tab-background-color: var(--bg-elev);
+  --dv-inactivegroup-visiblepanel-tab-background-color: rgba(255, 255, 255, 0.6);
+  --dv-activegroup-visiblepanel-tab-color: var(--text);
+  --dv-inactivegroup-visiblepanel-tab-color: var(--text-dim);
+  --dv-activegroup-hiddenpanel-tab-color: #fff;
+  --dv-inactivegroup-hiddenpanel-tab-color: rgba(255, 255, 255, 0.85);
+  --dv-tab-divider-color: var(--ngo-ink);
+  --dv-separator-border: var(--ngo-ink);
+  --dv-icon-hover-background-color: rgba(255, 255, 255, 0.45);
+  --dv-floating-box-shadow: var(--ngo-shadow);
+  --dv-floating-border: 2px solid var(--ngo-ink);
+}
+
+/* Every panel is a little window: an ink frame and a gradient title bar,
+   with a sliver of desktop showing between neighbours. */
+.dock .dv-view:has(> .dv-groupview) {
+  padding: 3px;
+}
+.dock .dv-groupview {
+  border: 2px solid var(--ngo-ink);
+}
+.dock .dv-tabs-and-actions-container {
+  background: var(--ngo-titlebar);
+  border-bottom: 2px solid var(--ngo-ink);
+}
+.dock .dv-tab {
+  font-weight: 700;
+  text-shadow: none;
+}
+.dock .dv-tab.dv-active-tab {
+  border-right: 2px solid var(--ngo-ink);
+}
+.dock .dv-tab.dv-inactive-tab {
+  text-shadow: 1px 1px 0 var(--ngo-ink);
+}
+
+/* The menu strip along the top and the taskbar along the bottom. */
+.desktop {
+  background:
+    radial-gradient(
+      120% 100% at 50% 0%,
+      color-mix(in srgb, var(--accent) 10%, transparent),
+      transparent 70%
+    ),
+    var(--bg);
+}
+
+.window-bar.glass-host {
+  background: linear-gradient(#fff8fd, #ffe7f6);
+  border-bottom: 2px solid var(--ngo-ink);
+}
+.bar.glass-host {
+  background: linear-gradient(#f5ecff, #e4d3ff);
+  border-top: 2px solid var(--ngo-ink);
+}
+
+/* Popovers and dialogs become windows with their own title stripe. */
+.popover.glass,
+.dialog.glass {
+  background:
+    var(--ngo-titlebar) top / 100% 14px no-repeat,
+    var(--bg-elev);
+  border: 2px solid var(--ngo-ink);
+  border-radius: 4px;
+  box-shadow: var(--ngo-shadow);
+  padding-top: 26px;
+}
+.dialog.glass {
+  padding-top: 34px;
+}
+.cm.glass,
+.log-float.glass,
+.sheet.glass {
+  border: 2px solid var(--ngo-ink);
+  box-shadow: var(--ngo-shadow);
+}
+
+/* Mobile: a lighter base so the pattern still glows through, and flat tabs
+   (the chunky button shadow reads as a stray divider there). */
+.dock-wrap .mshell {
+  background: rgba(255, 246, 252, 0.6);
+}
+.tabbar .tab:not(.active) {
+  box-shadow: none;
+}
+
+/* Mobile bars, same treatment as the desktop taskbar. */
+.top.glass-host,
+.voicebar.glass-host,
+.tabbar.glass-host {
+  background: linear-gradient(#f5ecff, #e4d3ff);
+  border-color: var(--ngo-ink);
+}
+
+/* A heart on whatever is picked. */
+.dock .dv-tab.dv-active-tab .dv-default-tab-content::before {
+  content: "♡ ";
+  color: var(--accent);
+}

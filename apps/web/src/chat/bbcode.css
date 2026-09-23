@@ -1,0 +1,195 @@
+/*
+ * Rendered BBCode (`ts/bbcode.ts`). Global rather than scoped: the markup comes
+ * from `v-html`, which scoped styles do not reach without `:deep()` in every
+ * component that shows it. Everything hangs off `.bb-*` classes, which only the
+ * renderer writes.
+ */
+.bb-rich a,
+.bb-link,
+.bb-client,
+.bb-channel {
+  color: var(--accent);
+}
+.bb-client,
+.bb-channel {
+  text-decoration: underline dotted;
+}
+/* A click magnifies it in the picture viewer (components/viewer). */
+.bb-img {
+  cursor: zoom-in;
+  max-width: 100%;
+  max-height: 360px;
+  border-radius: 6px;
+  vertical-align: middle;
+}
+.bb-img-ph {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  vertical-align: middle;
+}
+.bb-img-ph button {
+  font-size: 12px;
+  padding: 2px 8px;
+}
+.bb-img-always {
+  opacity: 0.75;
+}
+.bb-align {
+  width: 100%;
+}
+.bb-hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 6px 0;
+}
+.bb-list {
+  margin: 2px 0;
+  padding-left: 22px;
+}
+.bb-quote {
+  margin: 4px 0;
+  padding: 4px 10px;
+  border-left: 3px solid var(--border);
+  background: var(--bg-elev-2);
+  border-radius: 4px;
+}
+.bb-quote-by {
+  display: block;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.bb-code {
+  margin: 4px 0;
+  padding: 6px 10px;
+  background: var(--bg-elev-2);
+  border-radius: 4px;
+  overflow-x: auto;
+  white-space: pre;
+  font-size: 12px;
+}
+.bb-table {
+  border-collapse: collapse;
+  margin: 4px 0;
+}
+.bb-table td,
+.bb-table th {
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  text-align: left;
+}
+.bb-time {
+  text-decoration: underline dotted;
+}
+/* A file shared in chat (`ts3file://` link): name, size, buttons, and a status line. */
+.bb-file {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  max-width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-elev-2);
+  vertical-align: middle;
+}
+/* A file on another server: named, but nothing here can fetch it. */
+.bb-file.away {
+  opacity: 0.75;
+  border-style: dashed;
+}
+.bb-file-name {
+  font-weight: 600;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.bb-file-size {
+  color: var(--text-dim);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.bb-file-btn {
+  font-size: 12px;
+  padding: 2px 8px;
+}
+.bb-file-status {
+  flex-basis: 100%;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.bb-file-status:empty {
+  display: none;
+}
+.bb-file-status[data-kind="error"] {
+  color: var(--danger);
+}
+.bb-file-preview {
+  flex-basis: 100%;
+  line-height: 0;
+}
+/*
+ * A small picture that loaded by itself (chat/files/auto-preview-loader.ts):
+ * the card becomes the picture. Its name, size and buttons are only hidden, so
+ * the card is still there; clicking the picture opens the picture viewer, and
+ * downloading it lives in its menu (chat/files/card-menu.ts).
+ */
+.bb-file.sticker {
+  padding: 0;
+  border: none;
+  background: none;
+}
+.bb-file.sticker > :not(.bb-file-preview):not(.bb-file-status) {
+  display: none;
+}
+.bb-sticker-img {
+  /* The longest side of a sticker. */
+  max-width: 180px;
+  max-height: 180px;
+  border-radius: 8px;
+}
+
+/*
+ * A video shared in chat, once its Play button has fetched it
+ * (chat/files/video-poster.ts). Unlike a picture, the card stays a card — name,
+ * size, Download and Play are all still there, because those buttons are the
+ * keyboard's way into the player — and the poster is added underneath it.
+ *
+ * The badge is drawn over the middle of the first frame rather than baked into
+ * the still: the still is the `<video>` element's own `poster` image, captured
+ * from the first frame before the element lets go of its stream (see
+ * video-poster.ts), so there is nothing to composite.
+ */
+.bb-video-box {
+  position: relative;
+  display: inline-block;
+}
+.bb-file-video {
+  /* The longest side of a poster, as for a sticker. */
+  max-width: 260px;
+  max-height: 200px;
+  border-radius: 8px;
+  cursor: pointer;
+  vertical-align: bottom;
+}
+.bb-video-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding-left: 4px;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 55%);
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  /* The click belongs to the poster underneath, never to the badge. */
+  pointer-events: none;
+}

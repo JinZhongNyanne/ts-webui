@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- viewport-fit=cover lets the mobile shell paint under the notch and the
+         home indicator, and pad itself back with env(safe-area-inset-*). -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>JinzTS</title>
+    <!-- Installability: the manifest, the icons and the tags iOS reads.
+         The service worker itself is registered from src/pwa/register.ts,
+         in production builds only. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#0f1115" />
+    <meta name="description" content="TeamSpeak 网页客户端" />
+    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/icons/favicon-32.png" sizes="32x32" type="image/png" />
+    <!-- iOS reads none of the manifest: a home-screen launch is configured
+         entirely by these four tags, and it needs a raster touch icon. -->
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="JinzTS" />
+    <!-- black-translucent goes with the viewport-fit=cover above: the shell
+         paints under the status bar and pads itself back with env(). -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- Must stay first and classic (not a module): it recovers the page when
+         the app bundle itself fails to load. See public/boot.js. -->
+    <script src="/boot.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

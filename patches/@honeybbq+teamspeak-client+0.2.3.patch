@@ -1,0 +1,41 @@
+diff --git a/node_modules/@honeybbq/teamspeak-client/dist/index.mjs b/node_modules/@honeybbq/teamspeak-client/dist/index.mjs
+index 160a0a3..7d8f14e 100644
+--- a/node_modules/@honeybbq/teamspeak-client/dist/index.mjs
++++ b/node_modules/@honeybbq/teamspeak-client/dist/index.mjs
+@@ -585,19 +585,20 @@ var pe = class {
+ 			return;
+ 		}
+ 		if ((t === 0 || t === 1) && e.data.length > 5) {
+-			this.#D(e.data);
++			this.#D(e.data, t === 1);
+ 			return;
+ 		}
+ 		(t === 2 || t === 3) && e.data.length > 0 && this.#O(Buffer.from(e.data).toString("utf8"));
+ 	}
+-	#D(e) {
++	#D(e, w) {
+ 		if (this.#h.length === 0) return;
+ 		let t = new DataView(e.buffer, e.byteOffset, e.byteLength).getUint16(2, !1);
+ 		if (t === this.clid) return;
+ 		let n = {
+ 			clientId: t,
+ 			codec: e[4],
+-			data: e.subarray(5)
++			data: e.subarray(5),
++			whisper: w
+ 		};
+ 		for (let e of this.#h) setImmediate(() => e(n));
+ 	}
+diff --git a/node_modules/@honeybbq/teamspeak-client/dist/types.d.ts b/node_modules/@honeybbq/teamspeak-client/dist/types.d.ts
+index 5863d05..7c68258 100644
+--- a/node_modules/@honeybbq/teamspeak-client/dist/types.d.ts
++++ b/node_modules/@honeybbq/teamspeak-client/dist/types.d.ts
+@@ -68,6 +68,8 @@ export interface VoiceData {
+     clientId: number;
+     codec: number;
+     data: Uint8Array;
++    /** Sent as a whisper (packet type VoiceWhisper) rather than to the channel. */
++    whisper: boolean;
+ }
+ export interface EventMap {
+     textMessage: TextMessage;

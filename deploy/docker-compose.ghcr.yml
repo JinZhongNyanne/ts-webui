@@ -1,0 +1,60 @@
+# Same stack as docker-compose.yml, but the hub is PULLED from GHCR instead of
+# built here — nothing but Docker is needed on the server.
+#
+#   cd deploy && cp .env.example .env && $EDITOR .env
+#   docker compose -f docker-compose.ghcr.yml pull
+#   docker compose -f docker-compose.ghcr.yml up -d
+#
+# The image is published by .github/workflows/docker.yml and carries the web UI
+# as well: the hub serves it, so there is no separate web container.
+#
+# A private package needs one login first:
+#   echo $GH_TOKEN | docker login ghcr.io -u <user> --password-stdin
+services:
+  hub:
+    image: ${HUB_IMAGE:-ghcr.io/jinzhongnyanne/ts-webui-hub}:${HUB_TAG:-latest}
+    container_name: jinz-hub
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      HUB_HOST: 0.0.0.0
+      HUB_PORT: 8080
+      # Per-user profiles (avatar icon, channel-entry sound) live here.
+      HUB_DATA_DIR: /app/data
+    volumes:
+      - ./data:/app/data
+    expose:
+      - "8080"
+    depends_on:
+      - livekit
+
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: jinz-livekit
+    restart: unless-stopped
+    command: --config /etc/livekit.yaml
+    env_file: .env
+    ports:
+      - "7881:7881"
+      - "3478:3478/udp"
+      - "50000-50200:50000-50200/udp"
+    expose:
+      - "7880"
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml:ro
+
+  caddy:
+    image: caddy:2
+    container_name: jinz-caddy
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy-data:/data
+    depends_on:
+      - hub
+      - livekit

@@ -1,0 +1,60 @@
+/*
+ * dockview's own drop highlights, and which of them tell the truth.
+ *
+ * Two of them do not, and both are hidden here.
+ *
+ * **The centre of a window's content.** Dropping a tab there tears it out into
+ * its own floating window (see floatDrop.ts); it never merges the two windows.
+ * dockview still paints its "release to join this group" highlight, which
+ * promises a merge that will not happen.
+ *
+ * **The four edges of a window's content.** An edge drop really does split the
+ * window underneath and give the tab that half (see tabSplit.ts) — but not yet:
+ * the drag has to rest there for half a second first (snapDwell.ts). dockview
+ * paints its highlight the instant the pointer crosses into the quadrant, at
+ * full strength and with no fade, which on this desktop is the language of
+ * "release now and this happens". For the next 500ms that is false, and it was
+ * false in the one place a user is most likely to act on it. So the edges are
+ * hidden too, and `useTabDrop` puts up the desktop's own two-state feedback
+ * instead: the dashed, filling outline of the half while the wait runs, and the
+ * solid preview once the split is armed — the very same pair a dragged window
+ * gets at the screen's edges, which is the other half of why this is the right
+ * trade. One gesture, one visual language, and neither state says more than it
+ * can keep.
+ *
+ * What is given up is a highlight during a hover that resolves to no split at
+ * all — a window whose box cannot be measured, or a tab dropped back on its own
+ * window. Those drops tear out under the pointer, as they always have, and a
+ * tear-out is the desktop's default answer rather than something a highlight was
+ * ever explaining.
+ *
+ * Only the visuals go: the drops themselves still run. Blocking one would take
+ * `onWillShowOverlay` + `preventDefault`, which cancels the drop as well.
+ *
+ * The tab bar and the header space keep their highlight, untouched. A drop there
+ * merges the windows into one tabbed frame, and it does so the moment the tab is
+ * released, with no wait to misrepresent — so an instant, full-strength
+ * highlight is exactly right there.
+ *
+ * Two different elements can paint a content highlight, depending on where the
+ * group lives:
+ *
+ * - A floating window mounts the overlay in a shared anchor container
+ *   (`.dv-drop-target-container`, z-index 9999) outside the group, as
+ *   `.dv-drop-target-anchor`. Only the content drop target passes dockview's
+ *   `className: "dv-drop-target-content"`; the tab and header-space targets pass
+ *   none, so that class is what tells the two apart.
+ * - A grid group still renders the overlay in place, inside the group's own
+ *   `.dv-content-container` — which its tab bar is not inside, so that selector
+ *   is content-only for the same reason.
+ *
+ * Neither selector names a quadrant any more, because all five of them are now
+ * the desktop's own to draw.
+ *
+ * `display: none` rather than `visibility`, because dockview sets
+ * `visibility: visible` inline.
+ */
+.dock .dv-drop-target-anchor.dv-drop-target-content,
+.dock .dv-content-container > .dv-drop-target-dropzone > .dv-drop-target-selection {
+  display: none;
+}

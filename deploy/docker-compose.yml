@@ -1,0 +1,53 @@
+# Production stack: hub (gateway + web UI) + LiveKit + Caddy (HTTPS).
+# The music bot is expected on the same docker network as service name `musicbot`
+# (see README for attaching its compose project), or set MUSICBOT_URL to wherever it runs.
+services:
+  hub:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.hub
+    container_name: jinz-hub
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      HUB_HOST: 0.0.0.0
+      HUB_PORT: 8080
+      # Per-user profiles (avatar icon, channel-entry sound) live here.
+      HUB_DATA_DIR: /app/data
+    volumes:
+      - ./data:/app/data
+    expose:
+      - "8080"
+    depends_on:
+      - livekit
+
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: jinz-livekit
+    restart: unless-stopped
+    command: --config /etc/livekit.yaml
+    env_file: .env
+    ports:
+      - "7881:7881"
+      - "3478:3478/udp"
+      - "50000-50200:50000-50200/udp"
+    expose:
+      - "7880"
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml:ro
+
+  caddy:
+    image: caddy:2
+    container_name: jinz-caddy
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy-data:/data
+    depends_on:
+      - hub
+      - livekit

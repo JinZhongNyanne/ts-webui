@@ -1,0 +1,17 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+deploy/data/
+# hub profile storage (HUB_DATA_DIR), created wherever the hub is started
+data/
+deploy/caddy-data/
+coverage/
+.vite/
+*.log
+.DS_Store
+Thumbs.db
+.claude/settings.local.json
+.claude/test-environment.md

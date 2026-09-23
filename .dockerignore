@@ -1,0 +1,15 @@
+node_modules
+**/node_modules
+.git
+.env*
+!.env.example
+**/dist
+**/data
+# Both spellings: a .dockerignore pattern without ** only matches the root, and
+# a stale packages/protocol/tsconfig.tsbuildinfo from a host build makes tsc
+# emit nothing in the image — leaving the hub unable to resolve @jinz/protocol.
+*.tsbuildinfo
+**/*.tsbuildinfo
+deploy/data
+deploy/caddy-data
+.claude

@@ -1,0 +1,104 @@
+/* Shared look of the M2 admin windows: stacked rows that wrap at phone width. */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.toolbar .grow {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-width: 0;
+}
+.row.clickable {
+  cursor: pointer;
+}
+.row.clickable:hover,
+.row.selected {
+  border-color: var(--accent);
+}
+.row .main {
+  flex: 1 1 200px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.row .title {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.row .meta {
+  color: var(--text-dim);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.row .actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.row .actions button {
+  padding: 4px 10px;
+}
+.empty {
+  color: var(--text-dim);
+  text-align: center;
+  padding: 12px 0;
+}
+.err {
+  color: var(--danger);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.badge {
+  display: inline-block;
+  min-width: 18px;
+  padding: 0 6px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  text-align: center;
+}
+button.danger-text {
+  color: var(--danger);
+}
+dl.details {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 12px;
+  margin: 0;
+}
+dl.details dt {
+  color: var(--text-dim);
+}
+dl.details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+textarea,
+input {
+  font: inherit;
+}
+textarea {
+  width: 100%;
+  resize: vertical;
+}

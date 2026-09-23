@@ -1,0 +1,40 @@
+import type { whisper as source } from "../zh-CN/whisper";
+
+/** English strings for whispering: sending, receiving and the whisper-list settings pane. Keys mirror `../zh-CN/whisper.ts`. */
+export const whisper: Record<keyof typeof source, string> = {
+  "whisper.tab": "Whisper",
+  "whisper.intro":
+    "While you hold the whisper hotkey, your voice goes only to the channels and people below, not to your channel.",
+  "whisper.hotkey": "Hold {key} to whisper.",
+  "whisper.hotkeyUnbound": "No whisper hotkey yet: bind one under Hotkeys.",
+  "whisper.targets.title": "Whisper to",
+  "whisper.preset.channel": "Current channel",
+  "whisper.preset.parent": "Parent channel",
+  "whisper.preset.parents": "All parent channels",
+  "whisper.preset.subchannels": "Subchannels",
+  "whisper.preset.family": "Current channel and all below it",
+  "whisper.preset.all": "All channels",
+  "whisper.preset.commanders": "All channel commanders",
+  "whisper.channels.title": "Channels",
+  "whisper.channels.add": "Add a channel…",
+  "whisper.clients.title": "People",
+  "whisper.clients.add": "Add someone online…",
+  "whisper.remove": "Remove",
+  "whisper.offline": "(offline)",
+  "whisper.unknownChannel": "Channel {id} (not on this server)",
+  "whisper.preview": "Pressed now, it would reach {channels} channels and {clients} people.",
+  "whisper.previewEmpty": "Pressed now, it would reach nobody.",
+  "whisper.truncated": "More than {max} targets: the rest are left out.",
+  "whisper.receive.title": "Receiving",
+  "whisper.receive.allow": "Hear whispers from others",
+  "whisper.receive.block": "Block all whispers",
+  "whisper.pill": "Whisper → {channels} channels · {clients} people",
+  "whisper.pillNone": "Whisper: nobody to reach",
+  "whisper.pillTruncated": "(cut short)",
+  "whisper.noPower": "No whisper power",
+  "whisper.noPowerHint":
+    "You have no whisper power (i_client_whisper_power is 0): the server silently drops whispers to anyone who requires some, so this may reach nobody.",
+  "whisper.treeHint": "Whispering",
+  "voice.noTalkPower": "No talk power",
+  "notify.event.whisperReceived": "Whisper received",
+};

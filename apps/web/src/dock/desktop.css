@@ -1,0 +1,463 @@
+/*
+ * The desktop surface, its icons, the taskbar and the snap preview.
+ *
+ * Not scoped: `.dv-window-minimized` is put on dockview's own floating-window
+ * wrapper, which a scoped stylesheet could not reach.
+ */
+
+.desktop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+/*
+ * The user's wallpaper, over the skin's gradient rather than instead of it:
+ * "Fit" and "Centre" do not cover the whole desktop, and the theme's own
+ * background is what shows around them. Below the icons, and transparent to
+ * the pointer so the right-click that changes it still reaches the desktop.
+ */
+.desktop-wallpaper {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+/* Above the wallpaper layer, which is in the same stacking context. */
+.desktop .icons {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 4px;
+  /* This padding feeds ICON_GUTTER in dock/placement.ts — keep them in step. */
+  padding: 10px;
+  height: 100%;
+}
+.desk-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  /* This width (border-box, see styles/base.css) feeds ICON_GUTTER in
+     dock/placement.ts — keep them in step. */
+  width: 92px;
+  padding: 8px 4px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  text-align: center;
+  cursor: pointer;
+}
+.desk-icon:hover {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.desk-icon:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
+.desk-icon .glyph {
+  font-size: 26px;
+  line-height: 1.1;
+}
+.desk-icon .label {
+  font-size: 11px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 55%);
+}
+
+/*
+ * A minimised window keeps its box, so dockview can still measure it: with
+ * `display: none` dockview re-clamps the window from a zero-sized box on the
+ * next layout, parks it off-screen and serialises it as 0x0.
+ *
+ * Why not just `visibility: hidden`? Because `visibility` is inherited and a
+ * DESCENDANT is allowed to take it back — dockview's own stylesheet does
+ * exactly that (`.dv-tab.dv-active-tab .dv-default-tab .dv-default-tab-action
+ * { visibility: visible; }`), so the active tab's close "X" kept painting on
+ * an otherwise hidden window, a stray cross floating on the empty desktop.
+ * Out-specifying that selector would only win today's round of a war the next
+ * dockview release can restart.
+ *
+ * `opacity: 0` is the guarantee instead: opacity composites the element and
+ * its whole subtree as one group, so there is no property a descendant can set
+ * to paint itself back in, and unlike `display: none` it keeps the layout box.
+ * `visibility: hidden` stays alongside it for the semantics it does give
+ * (contents out of the accessibility tree and out of hit-testing), and the
+ * overlay is additionally marked `inert` in JS — see `applyMinimized` in
+ * `dockWindows.ts` — so nothing inside a minimised window can take keyboard
+ * focus or a click either.
+ *
+ * The class goes on TWO elements per window, not one. With
+ * `default-renderer="always"` a panel's content is not inside its frame: it
+ * lives in dockview's shared `.dv-render-overlay`, on the dock's shell, merely
+ * positioned over the frame. Hiding only the frame would leave a minimised
+ * window's contents floating on the empty desktop. And opacity earns its keep
+ * twice over here, because dockview writes `visibility` and `pointer-events`
+ * *inline* on that overlay — inline beats a class — while it never touches
+ * `opacity`.
+ */
+.dv-window-minimized {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/*
+ * How high the two snap rectangles sit: above every floating window, below the
+ * Snap Layouts flyout (1200).
+ *
+ * They used to sit at the bottom of the desktop, under every window, which
+ * hid exactly the shadows that matter most. A window-to-window snap puts the
+ * window flush against a neighbour, so its box lies right beside — or, filling
+ * a pocket, partly over — other windows; and a tab drag moves nothing until it
+ * is let go, so its preview can land anywhere, the dragged window's own old
+ * place included. A shadow painted underneath all of that promises a box the
+ * user cannot see. Both are translucent and ignore the pointer, so painting
+ * them on top costs nothing but a tint.
+ *
+ * dockview stacks its floats at `calc(var(--dv-overlay-z-index, 999) + 2i)`,
+ * one step per window, so this clears any desktop with fewer than fifty
+ * windows; `.dock-wrap` isolates the lot from the app's own dialogs.
+ */
+.dock-wrap {
+  --snap-overlay-z: 1100;
+}
+
+/*
+ * The pre-arm outline: the box a drag is resting on, and how much of the wait is
+ * left. See `SnapOverlay.vue` and `snapFeedback.ts` for why it exists at all —
+ * in short, because for the first half second a release does nothing, and the
+ * feedback has to say so.
+ *
+ * Everything about it is the solid preview's opposite number, on purpose:
+ * dashed where the preview is solid, hollow where the preview is filled, and
+ * dimmer throughout. Nobody who has seen the two together can mistake one for
+ * the other, which is the entire requirement.
+ *
+ * The one thing that moves is the fill climbing from the bottom edge, and it is
+ * the reason the wait no longer feels indefinite: it starts empty when the drag
+ * settles and is full at the instant the snap arms, so the rectangle's own state
+ * answers "how much longer?". It is timed by `--snap-dwell-ms`, which
+ * `SnapOverlay` writes inline from `DWELL_MS` — one number, in TypeScript, where
+ * the wait itself is defined.
+ */
+.snap-dwell {
+  --snap-dwell-enter-ms: 120ms;
+  --snap-dwell-leave-ms: 100ms;
+  /* Written inline from `DWELL_MS`; this is only a fallback for the element
+     somehow being rendered without it, and matches the constant's own value. */
+  --snap-dwell-ms: 500ms;
+  position: absolute;
+  z-index: var(--snap-overlay-z);
+  border: 2px dashed color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 4px;
+  /* Hollow: the box is being *considered*, and a filled rectangle is what this
+     desktop has always meant by "this is going to happen". */
+  background: none;
+  pointer-events: none;
+  /* Keeps the climbing fill inside the rounded corners. */
+  overflow: hidden;
+}
+/*
+ * The fill is a pseudo-element rather than a background gradient on the box
+ * itself, so scaling it costs the compositor nothing and animates on a stationary
+ * drag — which produces no JavaScript frames whatsoever — just as well as on a
+ * moving one.
+ */
+.snap-dwell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  /* Fills upwards, the direction a thing filling up goes. */
+  transform-origin: bottom;
+  transform: scaleY(0);
+  /* Linear, because it is a clock: any easing would misreport the time left. */
+  animation: snap-dwell-fill var(--snap-dwell-ms) linear forwards;
+}
+@keyframes snap-dwell-fill {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+/* A short fade, so the outline does not flash on for a drag merely passing by. */
+.snap-dwell-enter-active {
+  transition: opacity var(--snap-dwell-enter-ms) linear;
+}
+.snap-dwell-leave-active {
+  transition: opacity var(--snap-dwell-leave-ms) ease-in;
+}
+.snap-dwell-enter-from,
+.snap-dwell-leave-to {
+  opacity: 0;
+}
+
+/*
+ * The snap preview and its motion; see `SnapOverlay.vue` for why it moves at all.
+ *
+ * The numbers are Windows 11's own: a fifth of a second to arrive on Fluent's
+ * decelerating curve, half that to leave on an accelerating one, and the same
+ * fifth of a second for the glide between zones. They are named here rather than
+ * repeated down the file so the three durations cannot drift apart.
+ */
+.snap-preview {
+  --snap-preview-enter-ms: 200ms;
+  --snap-preview-glide-ms: 200ms;
+  --snap-preview-leave-ms: 100ms;
+  /* Fluent's "decelerate max" easing: quick off the mark, gentle into place. */
+  --snap-preview-decelerate: cubic-bezier(0.1, 0.9, 0.2, 1);
+  /* Fluent's standard easing, for something moving from one place to another. */
+  --snap-preview-glide-ease: cubic-bezier(0.2, 0, 0, 1);
+  position: absolute;
+  z-index: var(--snap-overlay-z);
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  pointer-events: none;
+  /* Scaled from the middle, so growing in does not slide it off its box. */
+  transform-origin: center;
+  /*
+   * The glide: the geometry, and only the geometry, of a rectangle that stays on
+   * screen while what it promises changes. Note that nothing animates the window
+   * itself — a transition on `.dv-resize-container` would make dockview's
+   * `getBoundingClientRect` read a box mid-flight and corrupt every snap.
+   */
+  transition:
+    left var(--snap-preview-glide-ms) var(--snap-preview-glide-ease),
+    top var(--snap-preview-glide-ms) var(--snap-preview-glide-ease),
+    width var(--snap-preview-glide-ms) var(--snap-preview-glide-ease),
+    height var(--snap-preview-glide-ms) var(--snap-preview-glide-ease);
+}
+.snap-preview-enter-active {
+  transition:
+    opacity var(--snap-preview-enter-ms) var(--snap-preview-decelerate),
+    transform var(--snap-preview-enter-ms) var(--snap-preview-decelerate);
+}
+.snap-preview-leave-active {
+  transition:
+    opacity var(--snap-preview-leave-ms) ease-in,
+    transform var(--snap-preview-leave-ms) ease-in;
+}
+.snap-preview-enter-from {
+  opacity: 0;
+  transform: scale(0.96);
+}
+.snap-preview-leave-to {
+  opacity: 0;
+  transform: scale(0.98);
+}
+/*
+ * A user who has asked for less motion gets the instant rectangle this was
+ * before: it still appears and disappears exactly when it is armed, with none of
+ * the travel.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .snap-preview,
+  .snap-preview-enter-active,
+  .snap-preview-leave-active {
+    transition: none;
+  }
+  .snap-preview-enter-from,
+  .snap-preview-leave-to {
+    opacity: 1;
+    transform: none;
+  }
+  /*
+   * The pre-arm outline stays — it is the honest half of this pair, and honesty
+   * is not motion — but everything that moves in it goes: it appears and
+   * disappears with the wait, hollow and dashed against the solid preview, so a
+   * user who has asked for less motion can still tell "keep holding" from
+   * "release and this happens".
+   */
+  .snap-dwell,
+  .snap-dwell-enter-active,
+  .snap-dwell-leave-active {
+    transition: none;
+  }
+  .snap-dwell-enter-from,
+  .snap-dwell-leave-to {
+    opacity: 1;
+  }
+  /* The climbing fill is pure animation, and there is no still frame of it that
+     would be true, so it is dropped rather than frozen part-way. */
+  .snap-dwell::after {
+    display: none;
+  }
+}
+
+.window-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elev);
+  /* Fixed, not min-height: a `.task-btn` is 24px tall (18px line-height + 2px
+     padding top/bottom + 1px border top/bottom), plus this bar's own 3px
+     vertical padding on each side = 30px. A min-height lets an empty bar
+     collapse to less than that and jump when the first window opens. */
+  height: 30px;
+}
+/*
+ * Only the window buttons scroll. The bar itself must not, or the minimise-all
+ * button at its end would scroll out of sight as soon as enough windows are
+ * open — the one button that has to stay reachable exactly then.
+ */
+.task-list {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.task-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 180px;
+  padding: 2px 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: var(--bg-elev-2);
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 18px;
+}
+.task-btn:hover {
+  border-color: var(--border);
+  color: var(--text);
+}
+.task-btn.active {
+  border-color: var(--accent);
+  color: var(--text);
+}
+/* Pinned to the right end of the bar, outside the scrolling list. */
+.task-btn.pinned {
+  padding: 2px 8px;
+}
+/* The leftmost pinned control carries the push that keeps the group at the end,
+   named rather than taken from source order so adding another cannot move it. */
+.task-btn.pinned.pin-start {
+  margin-left: auto;
+}
+.task-btn.minimized {
+  background: transparent;
+  opacity: 0.65;
+}
+.task-btn .task-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.task-btn:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/*
+ * The Snap Layouts flyout.
+ *
+ * Not scoped, for the same reason as the rest of this file: it is placed in
+ * `.dock-wrap` beside dockview's own root, above every floating window, and
+ * `.dock-wrap` clips what hangs outside it — so the panel is positioned to sit
+ * inside the desktop rather than over its edge. Its width comes from
+ * `useSnapLayouts.ts` as an inline style, so the two cannot drift.
+ */
+.snap-layouts {
+  position: absolute;
+  /* Above dockview's floating windows (~999) and its sashes, below the app's
+     dialogs, which live outside `.dock-wrap` entirely. */
+  z-index: 1200;
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-elev);
+  box-shadow: 0 12px 34px rgb(0 0 0 / 45%);
+}
+/* The drag panel is not tied to a window, so it hangs from the middle of the
+   top edge — clear of the edge itself, which still means "fill the desktop". */
+.snap-layouts.from-drag {
+  left: 50%;
+  top: 16px;
+  transform: translateX(-50%);
+}
+.snap-layout {
+  position: relative;
+  flex: none;
+  width: 92px;
+  height: 58px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--text-dim) 14%, transparent);
+}
+.snap-layout-zone {
+  position: absolute;
+  /* The seam between neighbouring regions: each tile insets itself, so the
+     gap is drawn without the fractions having to lie about the geometry. */
+  border: 2px solid transparent;
+  background-clip: content-box;
+  background-color: color-mix(in srgb, var(--text-dim) 40%, transparent);
+  border-radius: 5px;
+  padding: 0;
+  cursor: pointer;
+}
+.snap-layout-zone:hover,
+.snap-layout-zone:focus-visible {
+  background-color: var(--accent);
+  outline: none;
+}
+.snap-layout-zone:focus-visible {
+  border-color: var(--accent);
+}
+
+/*
+ * A floating window is moved by the empty space of its own tab bar (dockview's
+ * "void container", see `floating-group-drag-handle` in App.vue). That space is
+ * `flex-grow: 1` with no floor, so a window whose tabs fill the bar — dockview
+ * then folds the overflow into its own dropdown — is left with a void of zero
+ * width and no way to be dragged at all. This keeps a grab strip alive: the
+ * tabs give up the last few pixels instead, which they can, because they are
+ * already scrolling by then.
+ */
+.dock .dv-void-container {
+  min-width: 28px;
+  flex-shrink: 0;
+}
+
+/* The file picker is opened from the desktop's context menu, never shown. */
+.desktop .wallpaper-file {
+  display: none;
+}
+/*
+ * Why a picked file was refused. It sits at the top of the desktop, clear of
+ * the icons, and goes away when clicked or when the next file is picked —
+ * never a silent failure, never a dialog in the way.
+ */
+.wallpaper-notice {
+  position: absolute;
+  z-index: 2;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: min(520px, 80%);
+  margin: 0;
+  padding: 8px 14px;
+  border: 1px solid var(--danger);
+  border-radius: 8px;
+  background: var(--bg-elev);
+  color: var(--danger);
+  font-size: 12px;
+  cursor: pointer;
+}

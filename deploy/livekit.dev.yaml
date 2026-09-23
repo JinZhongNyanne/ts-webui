@@ -1,0 +1,11 @@
+# LiveKit config for local development (no TLS, no TURN).
+port: 7880
+rtc:
+  tcp_port: 7881
+  port_range_start: 50000
+  port_range_end: 50100
+  use_external_ip: false
+keys:
+  devkey: secret-must-be-at-least-32-characters-long
+logging:
+  level: info

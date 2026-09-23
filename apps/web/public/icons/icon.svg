@@ -1,0 +1,26 @@
+<!--
+  Placeholder branding for JinzTS: a "J" monogram on the app's accent gradient.
+  This file is the source of every raster icon; run `node scripts/pwa/rasterise-icons.mjs`
+  after changing it. The rounded tile suits the "any" purpose, where the
+  platform draws the icon as given. See icon-maskable.svg for the masked one.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4f8cff" />
+      <stop offset="1" stop-color="#7c5cff" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#0f1115" />
+  <rect width="512" height="512" rx="112" fill="url(#tile)" />
+  <g
+    transform="translate(6 21)"
+    fill="none"
+    stroke="#ffffff"
+    stroke-width="56"
+    stroke-linecap="round"
+  >
+    <path d="M210 120 H340" />
+    <path d="M300 120 V280 A70 70 0 0 1 160 280" />
+  </g>
+</svg>

@@ -1,0 +1,178 @@
+:root {
+  --bg: #0f1115;
+  --bg-elev: #171a21;
+  --bg-elev-2: #1f232c;
+  --border: #2a2f3a;
+  --text: #e6e8ee;
+  --text-dim: #9aa3b2;
+  --accent: #4f8cff;
+  --accent-2: #7c5cff;
+  --danger: #ff5c5c;
+  --ok: #3ddc84;
+  --warn: #ffb020;
+  --radius: 10px;
+  /*
+   * The smallest a control may be where it is hit with a fingertip. 44px is the
+   * figure both Apple and Google publish, and it is a token rather than a
+   * literal because the touch rules below and half a dozen components all have
+   * to agree on it.
+   */
+  --touch-target: 44px;
+  /* The page behind the panels; the theme turns it into a gradient. */
+  --app-bg: #0f1115;
+  /* 0 unless the theme's frosted-glass effect is on (`html[data-glass]`). */
+  --glass-blur: 0px;
+  --font:
+    "Inter", "Segoe UI", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--app-bg) fixed;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg-elev-2);
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+
+button:hover {
+  border-color: var(--accent);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+input,
+select,
+textarea {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+/* ------------------------------ frosted glass ------------------------------ */
+
+/*
+ * Set by the theme store. `.glass` blurs whatever sits behind the element.
+ *
+ * An element with `backdrop-filter` is both the backdrop root and the
+ * containing block of everything inside it, so a popover that opens out of it
+ * would lose its own blur and a `position: fixed` child would be pinned to it.
+ * Bars that host popovers use `.glass-host` instead, which puts the blur on a
+ * pseudo-element behind the content; the host must be positioned (the rule
+ * below makes it `relative`, so it is only for elements in the normal flow).
+ */
+html[data-glass] .dv-groupview,
+html[data-glass] .glass,
+html[data-glass] .glass-host::before {
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+}
+
+html[data-glass] .glass-host {
+  position: relative;
+  isolation: isolate;
+  /* Its own stacking context now, so lift it to where its popovers used to sit. */
+  z-index: 20;
+}
+
+html[data-glass] .glass-host::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* --------------------------------- touch ---------------------------------- */
+
+/*
+ * Everything above is sized for a mouse. On a touch device the same controls
+ * have to be hit with a fingertip, so the shared elements grow; the breakpoint
+ * itself lives in `mobile/breakpoint.ts` and must stay in step with the
+ * `max-width` used here.
+ */
+@media (pointer: coarse) {
+  button {
+    min-height: var(--touch-target);
+  }
+
+  input,
+  select,
+  textarea {
+    /* Below 16px, iOS Safari zooms the page in when the field takes focus and
+       never zooms back out. */
+    font-size: 16px;
+    min-height: var(--touch-target);
+  }
+
+  /* A slider is dragged with the same fingertip, and its own height is all the
+     hit area it has: a native range box is barely taller than its track. */
+  input[type="range"] {
+    min-height: var(--touch-target);
+  }
+
+  /* A scroller inside a panel should not drag the page (or the sheet behind it)
+     once it reaches its end. */
+  .dock-fill,
+  .pane {
+    overscroll-behavior: contain;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    /* The shell owns the whole viewport; nothing outside it should scroll. */
+    overflow: hidden;
+    /* Keep a long nickname or chat line from widening the page. */
+    overflow-wrap: anywhere;
+  }
+}

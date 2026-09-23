@@ -1,0 +1,93 @@
+/*
+ * NEEDY GIRL OVERDOSE, Ame's side: the same Windows-9x desktop as the "needy"
+ * skin (this sheet is layered after needy.css), at night in her room. The
+ * frames stay chunky and the font stays pixel; only the light pastel parts
+ * are turned into deep indigo and plum, lit by a muted pink.
+ */
+
+:root {
+  --ngo-ink: #0c0818;
+  --ngo-pink: #d77bb4;
+  --ngo-violet: #7a5bc4;
+  --ngo-cyan: #4f6bb8;
+  --ngo-shadow: 4px 4px 0 #05030b;
+  --text: #ecdfff;
+  --text-dim: #a894cf;
+  --border: #4d3b78;
+}
+
+/* ------------------------------- the desktop ------------------------------- */
+
+/* A dim starfield and a faint grid instead of the daytime hearts. */
+body {
+  background:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><path d='M18 22h2v2h-2zM16 24h2v2h-2zM18 24h2v2h-2zM20 24h2v2h-2zM18 26h2v2h-2zM96 40h2v2h-2zM62 88h2v2h-2zM60 90h2v2h-2zM62 90h2v2h-2zM64 90h2v2h-2zM62 92h2v2h-2zM120 108h2v2h-2zM34 118h2v2h-2z' fill='%23e9d8ff' fill-opacity='.55'/><path d='M104 16h2v2h-2zM106 16h2v2h-2zM102 18h2v2h-2zM104 18h2v2h-2zM106 18h2v2h-2zM108 18h2v2h-2zM104 20h2v2h-2zM106 20h2v2h-2z' fill='%23ff9fd4' fill-opacity='.35'/></svg>")
+      0 0 / 140px 140px,
+    linear-gradient(rgba(190, 160, 255, 0.07) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, rgba(190, 160, 255, 0.07) 1px, transparent 1px) 0 0 / 24px 24px,
+    var(--app-bg);
+  background-attachment: fixed;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+}
+::-webkit-scrollbar-thumb {
+  background: #5a4190;
+}
+
+/* --------------------------------- controls -------------------------------- */
+
+button {
+  background: #2a1f46;
+}
+button:hover {
+  background: #3b2b62;
+}
+
+input,
+select,
+textarea {
+  background: #150f28;
+  color: var(--text);
+}
+input:focus,
+select:focus,
+textarea:focus {
+  box-shadow: 0 0 0 2px rgba(215, 123, 180, 0.35);
+}
+
+/* ---------------------------------- windows -------------------------------- */
+
+.dock.dockview-theme-abyss,
+.dock .dockview-theme-abyss {
+  --dv-inactivegroup-visiblepanel-tab-background-color: rgba(255, 255, 255, 0.06);
+  /* On the pink title bar the dim text colour disappears; light ink stays legible. */
+  --dv-inactivegroup-visiblepanel-tab-color: #f3e9ff;
+  --dv-activegroup-hiddenpanel-tab-color: #eadcff;
+  --dv-inactivegroup-hiddenpanel-tab-color: rgba(234, 220, 255, 0.7);
+  --dv-icon-hover-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.desktop {
+  background:
+    radial-gradient(
+      120% 100% at 50% 0%,
+      color-mix(in srgb, var(--accent) 10%, transparent),
+      transparent 70%
+    ),
+    var(--bg);
+}
+
+.window-bar.glass-host {
+  background: linear-gradient(#231a3b, #1a1330);
+}
+.bar.glass-host,
+.top.glass-host,
+.voicebar.glass-host,
+.tabbar.glass-host {
+  background: linear-gradient(#251b40, #18112c);
+}
+.dock-wrap .mshell {
+  background: rgba(20, 14, 38, 0.6);
+}

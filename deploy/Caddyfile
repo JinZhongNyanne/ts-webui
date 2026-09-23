@@ -1,0 +1,13 @@
+{$DOMAIN} {
+  encode zstd gzip
+
+  # LiveKit signalling (WebSocket) + its HTTP API
+  handle_path /livekit/* {
+    reverse_proxy livekit:7880
+  }
+
+  # Everything else: hub (REST, /ws gateway, static web UI)
+  handle {
+    reverse_proxy hub:8080
+  }
+}

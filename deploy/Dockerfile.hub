@@ -1,0 +1,37 @@
+# Multi-stage build: compile protocol + hub + web, then run hub serving the web dist.
+FROM node:22-alpine AS build
+WORKDIR /app
+COPY package.json package-lock.json ./
+COPY packages/protocol/package.json packages/protocol/
+COPY apps/hub/package.json apps/hub/
+COPY apps/web/package.json apps/web/
+# The root postinstall applies these (patch-package) to the installed
+# dependencies, so they must be in place before `npm ci`.
+COPY patches patches/
+RUN npm ci
+COPY . .
+# The commit being built (CI passes it). The web bundle and the hub both carry
+# it, so a tab left open across an update can tell it is stale and offer a reload.
+ARG BUILD_ID=""
+ENV VITE_BUILD_ID=$BUILD_ID
+RUN npm run build
+
+FROM node:22-alpine AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=build /app/package.json /app/package-lock.json ./
+COPY --from=build /app/packages/protocol/package.json packages/protocol/
+COPY --from=build /app/apps/hub/package.json apps/hub/
+# patch-package is a dev dependency, so it cannot run here: skip the install
+# scripts and take the already-patched TeamSpeak library from the build stage
+# (same lockfile, same version) instead.
+RUN npm ci --omit=dev --ignore-scripts --workspace apps/hub --workspace packages/protocol
+COPY --from=build /app/node_modules/@honeybbq/teamspeak-client node_modules/@honeybbq/teamspeak-client
+COPY --from=build /app/packages/protocol/dist packages/protocol/dist
+COPY --from=build /app/apps/hub/dist apps/hub/dist
+COPY --from=build /app/apps/web/dist apps/web/dist
+# Last, so a new commit does not invalidate the cached dependency layers above.
+ARG BUILD_ID=""
+ENV BUILD_ID=$BUILD_ID
+EXPOSE 8080
+CMD ["node", "apps/hub/dist/index.js"]

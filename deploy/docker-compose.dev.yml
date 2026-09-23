@@ -1,0 +1,28 @@
+# Local development stack: a TS3 server + LiveKit in dev mode.
+# The hub and web UI run on the host with `npm run dev`.
+# The music bot is started from its own repo (scripts/docker) or `npm run dev` there.
+services:
+  teamspeak:
+    image: teamspeak:3.13
+    container_name: jinz-ts3
+    restart: unless-stopped
+    environment:
+      TS3SERVER_LICENSE: accept
+    ports:
+      - "9987:9987/udp" # voice
+      - "10011:10011" # ServerQuery (raw)
+      - "30033:30033" # file transfer
+    volumes:
+      - ./data/ts3:/var/ts3server
+
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: jinz-livekit
+    restart: unless-stopped
+    command: --config /etc/livekit.yaml --node-ip 127.0.0.1
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "50000-50100:50000-50100/udp"
+    volumes:
+      - ./livekit.dev.yaml:/etc/livekit.yaml:ro

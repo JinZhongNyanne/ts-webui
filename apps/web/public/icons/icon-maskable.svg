@@ -1,0 +1,21 @@
+<!--
+  Placeholder branding for JinzTS, shaped for the "maskable" purpose: the
+  platform may crop this to a circle or a squircle, so the gradient runs
+  full-bleed (no rounded corners of our own to be clipped off-centre) and the
+  monogram is scaled to sit inside the 80% safe zone the spec guarantees.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4f8cff" />
+      <stop offset="1" stop-color="#7c5cff" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#tile)" />
+  <g transform="translate(256 256) scale(0.72) translate(-250 -235)">
+    <g fill="none" stroke="#ffffff" stroke-width="56" stroke-linecap="round">
+      <path d="M210 120 H340" />
+      <path d="M300 120 V280 A70 70 0 0 1 160 280" />
+    </g>
+  </g>
+</svg>
